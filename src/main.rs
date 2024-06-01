@@ -15,13 +15,14 @@ fn main() {
         stdin.read_line(&mut input).unwrap();
 
         let cmd = input.trim();
-        let cmd_vec: Vec<char> = cmd.chars().collect();
+        let cmd_vec: Vec<&str> = cmd.split(" ").collect();
+
         let cmd_type = cmd_vec.get(0);
         let args = cmd_vec.get(1..).unwrap();
 
         match cmd_type.unwrap().to_string().as_str() {
             "echo" => {
-                let str_form: String = args.iter().collect();
+                let str_form: String = args.join(" ");
                 println!("{}", str_form);
             }
             "exit" => {
