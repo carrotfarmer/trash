@@ -1,6 +1,7 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use std::process::exit;
+
+mod builtins;
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -21,24 +22,9 @@ fn main() {
         let args = cmd_vec.get(1..).unwrap();
 
         match cmd_type.unwrap().to_string().as_str() {
-            "echo" => {
-                let str_form: String = args.join(" ");
-                println!("{}", str_form);
-            }
-            "exit" => {
-                if let Some(&single_char) = args.get(0) {
-                    // Convert the character to a String
-                    let char_string = single_char.to_string();
-
-                    // Parse the String to an integer
-                    match char_string.parse::<i32>() {
-                        Ok(exit_code) => exit(exit_code),
-                        Err(_) => println!("exit: could not parse exit code"),
-                    }
-                } else {
-                    println!("exit: too many arguments");
-                }
-            }
+            "echo" => builtins::echo(args),
+            "exit" => builtins::exit_fn(args),
+            "type" => builtins::type_fn(args),
             _ => println!("{}: command not found", cmd),
         }
     }
