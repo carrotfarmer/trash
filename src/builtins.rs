@@ -1,8 +1,8 @@
-use std::process::exit;
+use std::{env::set_current_dir, path::PathBuf, process::exit};
 
 use crate::path::find_exec;
 
-const BUILTINS: [&str; 4] = ["echo", "exit", "type", "pwd"];
+const BUILTINS: [&str; 5] = ["echo", "exit", "type", "pwd", "cd"];
 
 pub fn echo(args: &[&str]) {
     let str_form: String = args.join(" ");
@@ -43,4 +43,15 @@ pub fn type_fn(args: &[&str], path: &str) {
     } else {
         println!("exit: too many arguments");
     }
+}
+
+pub fn cd(path: PathBuf) {
+    if !path.exists() {
+        println!(
+            "{}: No such file or directory",
+            path.to_string_lossy().to_string()
+        );
+    }
+
+    let _ = set_current_dir(path);
 }

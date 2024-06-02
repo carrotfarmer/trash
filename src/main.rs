@@ -1,6 +1,6 @@
-use std::env;
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::{env, path::Path};
 
 use crate::path::find_exec;
 
@@ -32,6 +32,10 @@ fn main() {
             "echo" => builtins::echo(args),
             "exit" => builtins::exit_fn(args),
             "type" => builtins::type_fn(args, &path_var),
+            "cd" => {
+                let path = Path::new(args.get(0).unwrap());
+                builtins::cd(path.to_path_buf())
+            }
             _ => {
                 let exec = cmd_type.unwrap().to_string();
                 let exec_path = find_exec(path_var.as_ref(), exec.as_ref());
