@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 use std::process::Command;
-use std::str::from_utf8;
+use std::str::from_utf8_unchecked;
 
 pub fn run(exec_path: PathBuf, args: &[&str]) {
     let output = Command::new(exec_path)
@@ -8,10 +8,9 @@ pub fn run(exec_path: PathBuf, args: &[&str]) {
         .output()
         .expect("failed to execute process");
 
-    let output_str = match from_utf8(&output.stdout) {
-        Ok(v) => v,
-        Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-    };
-
-    println!("{}", output_str);
+    unsafe {
+        // please be utf8
+        let output_str = from_utf8_unchecked(&output.stdout);
+        println!("{}", output_str.trim());
+    }
 }
