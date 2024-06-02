@@ -34,7 +34,10 @@ pub fn type_fn(args: &[&str], path: &str) {
         }
 
         match find_exec(path, cmd_ref) {
-            Some(_) => println!("exec found"),
+            Some(path_buf) => {
+                let path_str = path_buf.to_string_lossy().to_string();
+                println!("{} is {}", cmd_ref, path_str);
+            }
             None => println!("{}: command not found", cmd_ref),
         }
     } else {
