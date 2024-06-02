@@ -1,4 +1,8 @@
-use std::{env::set_current_dir, path::PathBuf, process::exit};
+use std::{
+    env::{self, set_current_dir},
+    path::{Path, PathBuf},
+    process::exit,
+};
 
 use crate::path::find_exec;
 
@@ -45,12 +49,29 @@ pub fn type_fn(args: &[&str], path: &str) {
     }
 }
 
+#[allow(deprecated, deprecated_in_future)]
 pub fn cd(path: PathBuf) {
+    let path_str = path.to_string_lossy().to_string();
+    if path_str.contains("~") {
+        let new_path = path_str.replace(
+            "~",
+            env::home_dir()
+                .unwrap()
+                .to_string_lossy()
+                .to_string()
+                .as_ref(),
+        );
+
+        let _ = set_current_dir(Path::new(&new_path));
+        return;
+    }
+
     if !path.exists() {
         println!(
             "{}: No such file or directory",
             path.to_string_lossy().to_string()
         );
+        return;
     }
 
     let _ = set_current_dir(path);
