@@ -2,8 +2,11 @@ use std::env;
 #[allow(unused_imports)]
 use std::io::{self, Write};
 
+use crate::path::find_exec;
+
 mod builtins;
 mod path;
+mod run_exec;
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -29,7 +32,15 @@ fn main() {
             "echo" => builtins::echo(args),
             "exit" => builtins::exit_fn(args),
             "type" => builtins::type_fn(args, &path_var),
-            _ => println!("{}: command not found", cmd),
+            _ => {
+                let exec = cmd_type.unwrap().to_string();
+                let exec_path = find_exec(path_var.as_ref(), exec.as_ref());
+
+                match exec_path {
+                    Some(ep) => run_exec::run(ep, args),
+                    None => println!("{}: not found", exec),
+                }
+            }
         }
     }
 }
