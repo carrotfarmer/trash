@@ -2,7 +2,7 @@ use std::process::exit;
 
 use crate::path::find_exec;
 
-const BUILTINS: [&str; 3] = ["echo", "exit", "type"];
+const BUILTINS: [&str; 4] = ["echo", "exit", "type", "pwd"];
 
 pub fn echo(args: &[&str]) {
     let str_form: String = args.join(" ");
