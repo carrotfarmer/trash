@@ -1,5 +1,7 @@
 use std::process::exit;
 
+use crate::path::find_exec;
+
 const BUILTINS: [&str; 3] = ["echo", "exit", "type"];
 
 pub fn echo(args: &[&str]) {
@@ -22,7 +24,7 @@ pub fn exit_fn(args: &[&str]) {
     }
 }
 
-pub fn type_fn(args: &[&str]) {
+pub fn type_fn(args: &[&str], path: &str) {
     if let Some(&cmd_ref) = args.get(0) {
         for builtin in BUILTINS {
             if cmd_ref.eq(builtin) {
@@ -31,7 +33,10 @@ pub fn type_fn(args: &[&str]) {
             }
         }
 
-        println!("{} not found", cmd_ref);
+        match find_exec(path, cmd_ref) {
+            Some(_) => println!("exec found"),
+            None => println!("{}: command not found", cmd_ref),
+        }
     } else {
         println!("exit: too many arguments");
     }

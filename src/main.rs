@@ -1,7 +1,9 @@
+use std::env;
 #[allow(unused_imports)]
 use std::io::{self, Write};
 
 mod builtins;
+mod path;
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -15,6 +17,8 @@ fn main() {
         let mut input = String::new();
         stdin.read_line(&mut input).unwrap();
 
+        let path_var = env::var("PATH").unwrap();
+
         let cmd = input.trim();
         let cmd_vec: Vec<&str> = cmd.split(" ").collect();
 
@@ -24,7 +28,7 @@ fn main() {
         match cmd_type.unwrap().to_string().as_str() {
             "echo" => builtins::echo(args),
             "exit" => builtins::exit_fn(args),
-            "type" => builtins::type_fn(args),
+            "type" => builtins::type_fn(args, &path_var),
             _ => println!("{}: command not found", cmd),
         }
     }
