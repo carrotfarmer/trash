@@ -23,10 +23,34 @@ fn main() {
         let path_var = env::var("PATH").unwrap();
 
         let cmd = input.trim();
-        let cmd_vec: Vec<&str> = cmd.split(" ").collect();
+        let has_redir = cmd.contains(">");
 
-        let cmd_type = cmd_vec.get(0);
-        let args = cmd_vec.get(1..).unwrap();
+        let cmd_vec: Vec<&str>;
+        let cmd_type: Option<&str>;
+        let args: &[&str];
+
+        let output_file: &str;
+
+        if has_redir {
+            cmd_vec = cmd.trim().split(">").collect();
+            // split the command from cmd_vec by space, and extract the cmd_type and args
+            // cmd_type: Option<&&str> - the command to be executed
+            // args: &[&str] - the arguments to the command
+            let mut cmd_split = cmd_vec.get(0).expect("err: no command provided").split(" ");
+
+            cmd_type = cmd_split.next();
+            args = cmd_split.collect::<Vec<&str>>().as_slice();
+
+            output_file = cmd_vec.last().expect("err: no file provided");
+
+            println!("{:?}", cmd_type);
+            println!("{:?}", args);
+            println!("{:?}", output_file);
+        } else {
+            cmd_vec = cmd.split(" ").collect();
+            cmd_type = cmd_vec.get(0).copied();
+            args = cmd_vec.get(1..).unwrap();
+        }
 
         match cmd_type.unwrap().to_string().as_str() {
             "echo" => builtins::echo(args),
