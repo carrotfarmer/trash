@@ -52,7 +52,7 @@ fn main() {
             "cd" => {
                 let path = Path::new(args.get(0).unwrap());
                 builtins::cd(path.to_path_buf());
-                return;
+                continue;
             }
             "pwd" => builtins::pwd(),
             _ => {
