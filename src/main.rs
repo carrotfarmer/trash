@@ -7,10 +7,9 @@ use crate::path::find_exec;
 mod builtins;
 mod path;
 mod run_exec;
+mod utils;
 
 fn main() {
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
-    // println!("Logs from your program will appear here!");
     loop {
         print!("$ ");
         io::stdout().flush().unwrap();
@@ -27,48 +26,54 @@ fn main() {
 
         let cmd_vec: Vec<&str>;
         let cmd_type: Option<&str>;
-        let args: &[&str];
+        let args: Vec<&str>;
 
         let output_file: &str;
 
         if has_redir {
             cmd_vec = cmd.trim().split(">").collect();
-            // split the command from cmd_vec by space, and extract the cmd_type and args
-            // cmd_type: Option<&&str> - the command to be executed
-            // args: &[&str] - the arguments to the command
             let mut cmd_split = cmd_vec.get(0).expect("err: no command provided").split(" ");
 
             cmd_type = cmd_split.next();
-            args = cmd_split.collect::<Vec<&str>>().as_slice();
+            args = cmd_split.collect();
 
             output_file = cmd_vec.last().expect("err: no file provided");
-
-            println!("{:?}", cmd_type);
-            println!("{:?}", args);
-            println!("{:?}", output_file);
         } else {
             cmd_vec = cmd.split(" ").collect();
             cmd_type = cmd_vec.get(0).copied();
-            args = cmd_vec.get(1..).unwrap();
+            args = cmd_vec.get(1..).unwrap().to_vec();
+            output_file = "";
         }
 
-        match cmd_type.unwrap().to_string().as_str() {
-            "echo" => builtins::echo(args),
-            "exit" => builtins::exit_fn(args),
-            "type" => builtins::type_fn(args, &path_var),
+        let stdout: String = match cmd_type.unwrap().to_string().as_str() {
+            "echo" => builtins::echo(&args),
+            "exit" => builtins::exit_fn(&args),
+            "type" => builtins::type_fn(&args, &path_var),
             "cd" => {
                 let path = Path::new(args.get(0).unwrap());
-                builtins::cd(path.to_path_buf())
+                builtins::cd(path.to_path_buf());
+                return;
             }
+            "pwd" => builtins::pwd(),
             _ => {
                 let exec = cmd_type.unwrap().to_string();
                 let exec_path = find_exec(path_var.as_ref(), exec.as_ref());
 
                 match exec_path {
-                    Some(ep) => run_exec::run(ep, args),
-                    None => println!("{}: not found", exec),
+                    Some(ep) => run_exec::run(ep, &args),
+                    None => format!("{}: not found", exec),
                 }
             }
+        };
+
+        if has_redir {
+            if output_file.is_empty() {
+                println!("err: no file provided");
+                continue;
+            }
+            utils::write_to_file(output_file, &stdout).unwrap();
+        } else {
+            println!("{}", stdout);
         }
     }
 }
