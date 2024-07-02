@@ -56,6 +56,10 @@ fn main() {
             }
             "pwd" => builtins::pwd(),
             _ => {
+                if cmd_type.unwrap().is_empty() {
+                    continue;
+                }
+
                 let exec = cmd_type.unwrap().to_string();
                 let exec_path = find_exec(path_var.as_ref(), exec.as_ref());
 
