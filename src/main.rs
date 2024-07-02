@@ -34,6 +34,7 @@ fn main() {
             let mut cmd_split = cmd_vec.get(0).expect("err: no command provided").split(" ");
 
             cmd_type = cmd_split.next();
+
             args = cmd_split.collect();
 
             output_file = cmd_vec.last().expect("err: no file provided");
@@ -58,18 +59,22 @@ fn main() {
                 let exec = cmd_type.unwrap().to_string();
                 let exec_path = find_exec(path_var.as_ref(), exec.as_ref());
 
+                let cmd_args: Vec<&str>;
+
+                if args.len() == 1 && args.get(0).unwrap().is_empty() {
+                    cmd_args = vec![];
+                } else {
+                    cmd_args = args.clone();
+                }
+
                 match exec_path {
-                    Some(ep) => run_exec::run(ep, &args),
+                    Some(ep) => run_exec::run(ep, &cmd_args),
                     None => format!("{}: not found", exec),
                 }
             }
         };
 
         if has_redir {
-            println!("{:?}", cmd_type.unwrap());
-            println!("{:?}", args);
-            println!("{}", output_file);
-
             if output_file.is_empty() {
                 println!("err: no file provided");
                 continue;
