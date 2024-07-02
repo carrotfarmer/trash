@@ -10,6 +10,11 @@ pub fn run(exec_path: PathBuf, args: &[&str]) -> String {
 
     unsafe {
         // please be utf8
+        if output.stderr.len() > 0 {
+            let output_str = from_utf8_unchecked(&output.stderr);
+            return output_str.trim().to_string();
+        }
+
         let output_str = from_utf8_unchecked(&output.stdout);
         return output_str.trim().to_string();
     }

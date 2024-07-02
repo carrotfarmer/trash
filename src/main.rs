@@ -14,7 +14,6 @@ fn main() {
         print!("$ ");
         io::stdout().flush().unwrap();
 
-        // Wait for user input
         let stdin = io::stdin();
         let mut input = String::new();
         stdin.read_line(&mut input).unwrap();
@@ -67,10 +66,15 @@ fn main() {
         };
 
         if has_redir {
+            println!("{:?}", cmd_type.unwrap());
+            println!("{:?}", args);
+            println!("{}", output_file);
+
             if output_file.is_empty() {
                 println!("err: no file provided");
                 continue;
             }
+
             utils::write_to_file(output_file, &stdout).unwrap();
         } else {
             println!("{}", stdout);
