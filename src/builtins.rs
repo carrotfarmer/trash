@@ -20,7 +20,10 @@ pub fn exit_fn(args: &[&str]) -> String {
         // Parse the String to an integer
         match char_string.parse::<i32>() {
             Ok(exit_code) => exit(exit_code),
-            Err(_) => "exit: could not parse exit code".to_string(),
+            Err(_) => {
+                eprintln!("exit: could not parse exit code");
+                return "".to_string();
+            }
         }
     } else {
         "exit: too many arguments".to_string()

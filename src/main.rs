@@ -34,9 +34,7 @@ fn main() {
             let mut cmd_split = cmd_vec.get(0).expect("err: no command provided").split(" ");
 
             cmd_type = cmd_split.next();
-
             args = cmd_split.collect();
-
             output_file = cmd_vec.last().expect("err: no file provided");
         } else {
             cmd_vec = cmd.split(" ").collect();
@@ -63,17 +61,29 @@ fn main() {
                 let exec = cmd_type.unwrap().to_string();
                 let exec_path = find_exec(path_var.as_ref(), exec.as_ref());
 
-                let cmd_args: Vec<&str>;
+                let mut cmd_args: Vec<&str> = vec![];
 
-                if args.len() == 1 && args.get(0).unwrap().is_empty() {
-                    cmd_args = vec![];
-                } else {
-                    cmd_args = args.clone();
+                for arg in args {
+                    if arg.is_empty() {
+                        continue;
+                    }
+                    cmd_args.push(arg);
                 }
 
                 match exec_path {
-                    Some(ep) => run_exec::run(ep, &cmd_args),
-                    None => format!("{}: not found", exec),
+                    Some(ep) => {
+                        let print_stdout = !has_redir;
+                        let so = run_exec::run(ep, &cmd_args, print_stdout);
+                        if print_stdout {
+                            "".to_string()
+                        } else {
+                            so
+                        }
+                    }
+                    None => {
+                        eprintln!("{}: not found", exec);
+                        "".to_string()
+                    }
                 }
             }
         };
@@ -86,7 +96,9 @@ fn main() {
 
             utils::write_to_file(output_file, &stdout).unwrap();
         } else {
-            println!("{}", stdout);
+            if !stdout.is_empty() {
+                println!("{}", stdout);
+            }
         }
     }
 }

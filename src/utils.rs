@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::{self, Write};
 
 pub fn write_to_file(file_name: &str, content: &str) -> io::Result<()> {
-    let mut file = File::create(file_name)?;
+    println!("Writing to file: {}", file_name);
+    let mut file = File::create(file_name.trim())?;
     file.write_all(content.as_bytes())
 }
