@@ -16,8 +16,6 @@ pub fn run(exec_path: PathBuf, args: &[&str], print_stdout: bool) -> String {
             .spawn()
             .expect("failed to execute process");
     } else {
-        println!("exec_path: {:?}", exec_path);
-        println!("args: {:?}", args);
         child = Command::new(exec_path)
             .args(args)
             .stdout(Stdio::piped())
