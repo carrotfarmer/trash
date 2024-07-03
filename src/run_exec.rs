@@ -1,8 +1,6 @@
-use std::io::BufRead;
-use std::io::BufReader;
+use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
-use std::process::Child;
-use std::process::{Command, Stdio};
+use std::process::{Child, Command, Stdio};
 
 pub fn run(exec_path: PathBuf, args: &[&str], print_stdout: bool) -> String {
     let mut child: Child;
@@ -33,7 +31,6 @@ pub fn run(exec_path: PathBuf, args: &[&str], print_stdout: bool) -> String {
         }
     }
 
-    // Stream output.
     let lines = BufReader::new(stdout).lines();
     for line in lines {
         let l = line.unwrap();
