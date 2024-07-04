@@ -2,7 +2,7 @@ use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 
-pub fn run(exec_path: PathBuf, args: &[&str], print_stdout: bool) -> String {
+pub fn run(exec_path: PathBuf, args: Vec<String>, print_stdout: bool) -> String {
     let mut child: Child;
     let mut stdout_str: String = String::new();
 

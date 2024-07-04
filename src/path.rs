@@ -1,4 +1,11 @@
-use std::path::{Path, PathBuf};
+use std::{
+    env,
+    path::{Path, PathBuf},
+};
+
+pub fn get_path_var() -> String {
+    env::var("PATH").unwrap()
+}
 
 pub fn find_exec(path_var: &str, exec: &str) -> Option<PathBuf> {
     if exec.contains("/") {

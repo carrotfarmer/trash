@@ -1,9 +1,9 @@
 use std::fmt::Debug;
 
 #[derive(Debug, PartialEq)]
-struct Command {
-    cmd_type: Option<String>,
-    args: Vec<String>,
+pub struct Command {
+    pub cmd_type: Option<String>,
+    pub args: Vec<String>,
 }
 
 impl Command {
@@ -13,8 +13,8 @@ impl Command {
 }
 
 #[derive(Debug, PartialEq)]
-struct OutputRedir {
-    file: String,
+pub struct OutputRedir {
+    pub file: String,
 }
 
 impl OutputRedir {
@@ -24,14 +24,14 @@ impl OutputRedir {
 }
 
 #[derive(Debug, PartialEq)]
-enum Pipe {
+pub enum Pipe {
     OutputRedir(OutputRedir),
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Token {
-    command: Option<Command>,
-    pipe: Option<Pipe>,
+    pub command: Option<Command>,
+    pub pipe: Option<Pipe>,
 }
 
 impl Token {
@@ -92,7 +92,6 @@ mod tests {
     fn output_redir() {
         let input = "ls > test.txt";
         let tokens = tokenizer(input.to_string());
-        println!("\n\n{:?}\n\n", tokens);
         let expected = vec![
             Token::new(None, Some(Command::new(Some("ls".to_string()), vec![]))),
             Token::new(
@@ -104,7 +103,6 @@ mod tests {
 
         let input = "ls -l > test.txt";
         let tokens = tokenizer(input.to_string());
-        println!("\n\n{:?}\n\n", tokens);
         let expected = vec![
             Token::new(
                 None,
@@ -119,7 +117,6 @@ mod tests {
 
         let input = "cmd -s -l --help > test.txt";
         let tokens = tokenizer(input.to_string());
-        println!("\n\n{:?}\n\n", tokens);
         let expected = vec![
             Token::new(
                 None,

@@ -8,15 +8,12 @@ use crate::path::find_exec;
 
 const BUILTINS: [&str; 5] = ["echo", "exit", "type", "pwd", "cd"];
 
-pub fn echo(args: &[&str]) -> String {
+pub fn echo(args: Vec<String>) -> String {
     return args.join(" ");
 }
 
-pub fn exit_fn(args: &[&str]) -> String {
-    if let Some(&single_char) = args.get(0) {
-        // Convert the character to a String
-        let char_string = single_char.to_string();
-
+pub fn exit_fn(args: Vec<String>) -> String {
+    if let Some(char_string) = args.get(0) {
         // Parse the String to an integer
         match char_string.parse::<i32>() {
             Ok(exit_code) => exit(exit_code),
@@ -30,15 +27,15 @@ pub fn exit_fn(args: &[&str]) -> String {
     }
 }
 
-pub fn type_fn(args: &[&str], path: &str) -> String {
-    if let Some(&cmd_ref) = args.get(0) {
+pub fn type_fn(args: Vec<String>, path: &str) -> String {
+    if let Some(cmd_ref) = args.get(0) {
         for builtin in BUILTINS {
             if cmd_ref.eq(builtin) {
                 return format!("{} is a shell builtin", cmd_ref);
             }
         }
 
-        match find_exec(path, cmd_ref) {
+        match find_exec(path, &cmd_ref) {
             Some(path_buf) => {
                 let path_str = path_buf.to_string_lossy().to_string();
                 format!("{} is {}", cmd_ref, path_str)
