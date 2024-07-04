@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Command {
     pub cmd_type: Option<String>,
     pub args: Vec<String>,
@@ -12,7 +12,7 @@ impl Command {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct OutputRedir {
     pub file: String,
 }
@@ -23,12 +23,12 @@ impl OutputRedir {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Pipe {
     OutputRedir(OutputRedir),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Token {
     pub command: Option<Command>,
     pub pipe: Option<Pipe>,

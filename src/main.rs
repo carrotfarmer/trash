@@ -1,10 +1,4 @@
-#[allow(unused_imports)]
 use std::io::{self, Write};
-use std::{env, path::Path};
-
-use tokenizer::Token;
-
-use crate::{parser::eval_stmt, path::find_exec};
 
 mod builtins;
 mod parser;
@@ -22,8 +16,12 @@ fn main() {
         let mut input = String::new();
         stdin.read_line(&mut input).unwrap();
 
-        // split input into commands by `&&` and `>`
         let tokens = tokenizer::tokenizer(input);
-        println!("{}", parser::eval_stmt(tokens));
+        let (stdout, printed_stdout) = parser::eval_stmt(tokens.clone());
+        let has_pipe = parser::has_pipe(&tokens);
+
+        if !has_pipe && !printed_stdout {
+            println!("{}", stdout);
+        }
     }
 }

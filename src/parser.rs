@@ -4,16 +4,21 @@ use crate::{
     builtins,
     path::{find_exec, get_path_var},
     run_exec::run,
-    tokenizer::Token,
+    tokenizer::{Pipe, Token},
+    utils::write_to_file,
 };
 
-pub fn eval_stmt(tokens: Vec<Token>) -> String {
+pub fn has_pipe(tokens: &Vec<Token>) -> bool {
+    tokens.iter().any(|t| t.pipe.is_some())
+}
+
+pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
     let mut stdout = String::new();
     let path_var = get_path_var();
 
-    let has_pipe = tokens.iter().any(|t| t.pipe.is_some());
+    let mut printed_stdout = false;
 
-    for token in tokens {
+    for token in &tokens {
         match token {
             Token {
                 command: Some(cmd),
@@ -23,13 +28,13 @@ pub fn eval_stmt(tokens: Vec<Token>) -> String {
 
                 match cmd_type.to_string().as_str() {
                     "echo" => {
-                        stdout.push_str(builtins::echo(cmd.args).as_str());
+                        stdout.push_str(builtins::echo(cmd.args.clone()).as_str());
                     }
                     "exit" => {
-                        stdout.push_str(builtins::exit_fn(cmd.args).as_str());
+                        stdout.push_str(builtins::exit_fn(cmd.args.clone()).as_str());
                     }
                     "type" => {
-                        stdout.push_str(builtins::type_fn(cmd.args, &path_var).as_str());
+                        stdout.push_str(builtins::type_fn(cmd.args.clone(), &path_var).as_str());
                     }
                     "cd" => {
                         let path = Path::new(cmd.args.get(0).unwrap());
@@ -42,11 +47,14 @@ pub fn eval_stmt(tokens: Vec<Token>) -> String {
                         let exec = cmd_type.to_string();
                         let exec_path = find_exec(path_var.as_ref(), exec.as_ref());
 
-                        let print_stdout: bool = has_pipe;
+                        let print_stdout = !has_pipe(&tokens);
+                        if print_stdout && !printed_stdout {
+                            printed_stdout = true;
+                        }
 
                         match exec_path {
                             Some(ep) => {
-                                stdout.push_str(run(ep, cmd.args, print_stdout).as_str());
+                                stdout.push_str(run(ep, cmd.args.clone(), print_stdout).as_str());
                             }
                             None => eprintln!("{}: not found", exec),
                         }
@@ -56,10 +64,15 @@ pub fn eval_stmt(tokens: Vec<Token>) -> String {
             Token {
                 command: None,
                 pipe: Some(pipe),
-            } => {}
+            } => match pipe {
+                Pipe::OutputRedir(or) => match write_to_file(&or.file, &stdout) {
+                    Ok(_) => {}
+                    Err(e) => eprintln!("{}", e),
+                },
+            },
             _ => {}
         }
     }
 
-    stdout
+    (stdout, printed_stdout)
 }
