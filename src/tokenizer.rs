@@ -42,29 +42,59 @@ impl Token {
 
 pub fn tokenizer(input: String) -> Vec<Token> {
     let mut tokens: Vec<Token> = vec![];
-    let mut cmd_type: Option<String> = None;
-    let mut args: Vec<String> = vec![];
-    let mut pipe: Option<Pipe> = None;
 
-    let input = &input.trim().to_string();
-    let input = input.replace(">", " > ");
+    let mut curr_cmd_type = None;
+    let mut curr_args: Vec<String> = vec![];
 
-    let split = input.split_whitespace();
-
-    for word in split {
+    for word in input.split_whitespace() {
         if word == ">" {
-            let file = split.next().unwrap().to_string();
-            pipe = Some(Pipe::OutputRedir(OutputRedir::new(file)));
+            if !curr_cmd_type.is_none() {
+                tokens.push(Token::new(
+                    None,
+                    Some(Command::new(curr_cmd_type.clone(), curr_args.clone())),
+                ));
+            }
+
+            curr_cmd_type = None;
+            curr_args = vec![];
+
+            let file = input.split_whitespace().next().unwrap().to_string();
+            tokens.push(Token::new(
+                Some(Pipe::OutputRedir(OutputRedir::new(file))),
+                None,
+            ));
         } else {
-            if cmd_type.is_none() {
-                cmd_type = Some(word.to_string());
+            if curr_cmd_type.is_none() {
+                curr_cmd_type = Some(word.to_string());
             } else {
-                args.push(word.to_string());
+                curr_args.push(word.to_string());
             }
         }
     }
 
-    tokens.push(Token::new(pipe, Some(Command::new(cmd_type, args))));
+    tokens.push(Token::new(
+        None,
+        Some(Command::new(curr_cmd_type.clone(), curr_args.clone())),
+    ));
 
     tokens
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_tokenizer() {
+        let input = "ls > test.txt";
+        let tokens = tokenizer(input.to_string());
+        let expected = vec![
+            Token::new(None, Some(Command::new(Some("ls".to_string()), vec![]))),
+            Token::new(
+                Some(Pipe::OutputRedir(OutputRedir::new("test.txt".to_string()))),
+                None,
+            ),
+        ];
+        assert_eq!(tokens, expected);
+    }
 }
