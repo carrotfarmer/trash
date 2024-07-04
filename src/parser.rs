@@ -4,12 +4,12 @@ use crate::{
     builtins,
     path::{find_exec, get_path_var},
     run_exec::run,
-    tokenizer::{Pipe, Token},
+    tokenizer::{Operator, Token},
     utils::write_to_file,
 };
 
 pub fn has_pipe(tokens: &Vec<Token>) -> bool {
-    tokens.iter().any(|t| t.pipe.is_some())
+    tokens.iter().any(|t| t.operator.is_some())
 }
 
 pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
@@ -22,7 +22,7 @@ pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
         match token {
             Token {
                 command: Some(cmd),
-                pipe: None,
+                operator: None,
             } => {
                 let cmd_type = cmd.cmd_type.as_ref().unwrap();
 
@@ -63,12 +63,13 @@ pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
             }
             Token {
                 command: None,
-                pipe: Some(pipe),
-            } => match pipe {
-                Pipe::OutputRedir(or) => match write_to_file(&or.file, &stdout) {
+                operator: Some(operator),
+            } => match operator {
+                Operator::OutputRedir(or) => match write_to_file(&or.file, &stdout) {
                     Ok(_) => {}
                     Err(e) => eprintln!("{}", e),
                 },
+                _ => {}
             },
             _ => {}
         }
