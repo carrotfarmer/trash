@@ -46,7 +46,9 @@ pub fn tokenizer(input: String) -> Vec<Token> {
     let mut curr_cmd_type = None;
     let mut curr_args: Vec<String> = vec![];
 
-    for word in input.split_whitespace() {
+    let mut split = input.split_whitespace();
+
+    while let Some(word) = split.next() {
         if word == ">" {
             if !curr_cmd_type.is_none() {
                 tokens.push(Token::new(
@@ -58,7 +60,7 @@ pub fn tokenizer(input: String) -> Vec<Token> {
             curr_cmd_type = None;
             curr_args = vec![];
 
-            let file = input.split_whitespace().next().unwrap().to_string();
+            let file = split.next().unwrap().to_string();
             tokens.push(Token::new(
                 Some(Pipe::OutputRedir(OutputRedir::new(file))),
                 None,
@@ -72,10 +74,12 @@ pub fn tokenizer(input: String) -> Vec<Token> {
         }
     }
 
-    tokens.push(Token::new(
-        None,
-        Some(Command::new(curr_cmd_type.clone(), curr_args.clone())),
-    ));
+    if !curr_cmd_type.is_none() {
+        tokens.push(Token::new(
+            None,
+            Some(Command::new(curr_cmd_type.clone(), curr_args.clone())),
+        ));
+    }
 
     tokens
 }
@@ -85,11 +89,45 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_tokenizer() {
+    fn output_redir() {
         let input = "ls > test.txt";
         let tokens = tokenizer(input.to_string());
+        println!("\n\n{:?}\n\n", tokens);
         let expected = vec![
             Token::new(None, Some(Command::new(Some("ls".to_string()), vec![]))),
+            Token::new(
+                Some(Pipe::OutputRedir(OutputRedir::new("test.txt".to_string()))),
+                None,
+            ),
+        ];
+        assert_eq!(tokens, expected);
+
+        let input = "ls -l > test.txt";
+        let tokens = tokenizer(input.to_string());
+        println!("\n\n{:?}\n\n", tokens);
+        let expected = vec![
+            Token::new(
+                None,
+                Some(Command::new(Some("ls".to_string()), vec!["-l".to_string()])),
+            ),
+            Token::new(
+                Some(Pipe::OutputRedir(OutputRedir::new("test.txt".to_string()))),
+                None,
+            ),
+        ];
+        assert_eq!(tokens, expected);
+
+        let input = "cmd -s -l --help > test.txt";
+        let tokens = tokenizer(input.to_string());
+        println!("\n\n{:?}\n\n", tokens);
+        let expected = vec![
+            Token::new(
+                None,
+                Some(Command::new(
+                    Some("cmd".to_string()),
+                    vec!["-s".to_string(), "-l".to_string(), "--help".to_string()],
+                )),
+            ),
             Token::new(
                 Some(Pipe::OutputRedir(OutputRedir::new("test.txt".to_string()))),
                 None,
