@@ -1,5 +1,7 @@
 use std::path::Path;
 
+use anyhow::Result;
+
 use crate::{
     builtins,
     path::{find_exec, get_path_var},
@@ -17,6 +19,8 @@ pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
     let path_var = get_path_var();
 
     let mut printed_stdout = false;
+
+    let mut prev_res: Option<Result<String>> = None;
 
     for token in &tokens {
         match token {
@@ -54,7 +58,13 @@ pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
 
                         match exec_path {
                             Some(ep) => {
-                                stdout.push_str(run(ep, cmd.args.clone(), print_stdout).as_str());
+                                let res = run(ep, cmd.args.clone(), print_stdout);
+                                match res {
+                                    Ok(s) => stdout.push_str(s.as_str()),
+                                    Err(e) => {
+                                        prev_res = Some(Err(e));
+                                    }
+                                }
                             }
                             None => eprintln!("{}: not found", exec),
                         }
@@ -69,7 +79,17 @@ pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
                     Ok(_) => {}
                     Err(e) => eprintln!("{}", e),
                 },
-                _ => {}
+                Operator::LogicalAnd => {
+                    let pr = prev_res.as_ref();
+                    if pr.as_ref().is_some() {
+                        let res = prev_res.unwrap();
+                        if res.is_err() {
+                            break;
+                        }
+                    }
+
+                    prev_res = None;
+                }
             },
             _ => {}
         }

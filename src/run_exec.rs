@@ -2,9 +2,12 @@ use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 
-pub fn run(exec_path: PathBuf, args: Vec<String>, print_stdout: bool) -> String {
+use anyhow::{anyhow, Result};
+
+pub fn run(exec_path: PathBuf, args: Vec<String>, print_stdout: bool) -> Result<String> {
     let mut child: Child;
     let mut stdout_str: String = String::new();
+    let mut stderr_str: String = String::new();
 
     if exec_path.to_str().unwrap().contains("./") {
         child = Command::new("sh")
@@ -27,7 +30,8 @@ pub fn run(exec_path: PathBuf, args: Vec<String>, print_stdout: bool) -> String 
     if stderr.is_some() {
         let lines = BufReader::new(stderr.unwrap()).lines();
         for line in lines {
-            eprintln!("{}", line.unwrap());
+            eprintln!("{}", line.as_ref().unwrap());
+            stderr_str.push_str(format!("{}\n", line.as_ref().unwrap()).as_ref());
         }
     }
 
@@ -40,5 +44,9 @@ pub fn run(exec_path: PathBuf, args: Vec<String>, print_stdout: bool) -> String 
         }
     }
 
-    return stdout_str;
+    if !stderr_str.is_empty() {
+        return Err(anyhow!("{}", stderr_str));
+    }
+
+    Ok(stdout_str)
 }
