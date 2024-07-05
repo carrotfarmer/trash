@@ -60,7 +60,10 @@ pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
                             Some(ep) => {
                                 let res = run(ep, cmd.args.clone(), print_stdout);
                                 match res {
-                                    Ok(s) => stdout.push_str(s.as_str()),
+                                    Ok(s) => {
+                                        prev_res = Some(Ok(s.clone()));
+                                        stdout.push_str(s.as_str())
+                                    }
                                     Err(e) => {
                                         prev_res = Some(Err(e));
                                     }
@@ -80,15 +83,14 @@ pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
                     Err(e) => eprintln!("{}", e),
                 },
                 Operator::LogicalAnd => {
-                    let pr = prev_res.as_ref();
-                    if pr.as_ref().is_some() {
-                        let res = prev_res.unwrap();
-                        if res.is_err() {
-                            break;
-                        }
+                    if let Some(Err(_)) = prev_res {
+                        println!("we break");
+                        break;
+                    } else {
+                        println!("we continue");
+                        prev_res = None;
+                        continue;
                     }
-
-                    prev_res = None;
                 }
             },
             _ => {}

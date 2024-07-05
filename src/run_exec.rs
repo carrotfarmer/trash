@@ -44,7 +44,7 @@ pub fn run(exec_path: PathBuf, args: Vec<String>, print_stdout: bool) -> Result<
         }
     }
 
-    if !stderr_str.is_empty() {
+    if !stderr_str.len() > 0 {
         return Err(anyhow!("{}", stderr_str));
     }
 
