@@ -18,7 +18,7 @@ fn main() {
 
         let tokens = tokenizer::tokenizer(input);
         let (stdout, printed_stdout) = parser::eval_stmt(tokens.clone());
-        let has_pipe = parser::has_pipe(&tokens);
+        let has_pipe = parser::has_redir(&tokens);
 
         if !has_pipe && !printed_stdout {
             println!("{}", stdout);

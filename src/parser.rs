@@ -10,8 +10,18 @@ use crate::{
     utils::write_to_file,
 };
 
-pub fn has_pipe(tokens: &Vec<Token>) -> bool {
-    tokens.iter().any(|t| t.operator.is_some())
+pub fn has_redir(tokens: &Vec<Token>) -> bool {
+    for token in tokens {
+        match token {
+            Token {
+                command: None,
+                operator: Some(Operator::OutputRedir(_)),
+            } => return true,
+            _ => {}
+        }
+    }
+
+    false
 }
 
 pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
@@ -51,7 +61,7 @@ pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
                         let exec = cmd_type.to_string();
                         let exec_path = find_exec(path_var.as_ref(), exec.as_ref());
 
-                        let print_stdout = !has_pipe(&tokens);
+                        let print_stdout = !has_redir(&tokens);
                         if print_stdout && !printed_stdout {
                             printed_stdout = true;
                         }
@@ -88,7 +98,7 @@ pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
                         break;
                     } else {
                         prev_res = None;
-                        println!("prev_res: {:?}", prev_res);
+                        stdout.push_str("\n");
                         continue;
                     }
                 }
