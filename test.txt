@@ -1,0 +1,17 @@
+total 112
+drwxr-xr-x   16 dhruvasrinivas  staff    512 Jul  6 18:42 .
+drwx------@ 149 dhruvasrinivas  staff   4768 Jul  3 13:20 ..
+-rw-r--r--@   1 dhruvasrinivas  staff   6148 Jul  3 17:37 .DS_Store
+drwxr-xr-x   13 dhruvasrinivas  staff    416 Jul  6 18:44 .git
+-rw-r--r--    1 dhruvasrinivas  staff     12 May 30 21:19 .gitattributes
+-rw-r--r--    1 dhruvasrinivas  staff    239 Jul  1 20:30 .gitignore
+-rw-------    1 dhruvasrinivas  staff  12288 Jul  3 14:07 .swp
+-rw-r--r--    1 dhruvasrinivas  staff   1987 Jul  1 21:01 Cargo.lock
+-rw-------    1 dhruvasrinivas  staff    798 Jul  1 21:01 Cargo.toml
+-rw-r--r--    1 dhruvasrinivas  staff     25 Jun  1 21:09 README.md
+-rw-r--r--    1 dhruvasrinivas  staff    287 Jun  1 18:22 codecrafters.yml
+drwxr-xr-x    9 dhruvasrinivas  staff    288 Jul  6 18:48 src
+drwxr-xr-x@   5 dhruvasrinivas  staff    160 May 30 21:20 target
+-rwxr-xr-x    1 dhruvasrinivas  staff    102 Jul  3 14:06 test.sh
+-rw-r--r--    1 dhruvasrinivas  staff     91 Jul  6 18:47 test.txt
+-rwxr-xr-x    1 dhruvasrinivas  staff    282 May 30 21:19 your_shell.sh
