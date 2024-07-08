@@ -102,6 +102,7 @@ pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
                         continue;
                     }
                 }
+                Operator::Pipe => todo!(),
             },
             _ => {}
         }
