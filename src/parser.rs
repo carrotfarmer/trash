@@ -25,6 +25,9 @@ pub fn has_redir(tokens: &Vec<Token>) -> bool {
 }
 
 pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
+    let new_tokens = tokens.clone();
+    let mut curr_index = 0;
+
     let mut stdout = String::new();
     let path_var = get_path_var();
 
@@ -32,7 +35,7 @@ pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
 
     let mut prev_res: Option<Result<String>> = None;
 
-    for token in &tokens {
+    for token in new_tokens {
         match token {
             Token {
                 command: Some(cmd),
@@ -93,6 +96,31 @@ pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
                     Ok(_) => {}
                     Err(e) => eprintln!("{}", e),
                 },
+                Operator::Pipe => {
+                    if let Some(Err(_)) = prev_res {
+                        break;
+                    } else {
+                        new_tokens = new_tokens
+                            .iter()
+                            .map(|t| {
+                                let new_token = token.clone();
+                                if t == new_token {
+                                    let mut new_cmd = t.command.clone().unwrap();
+                                    new_cmd.args.push(stdout.clone());
+                                    Token {
+                                        command: Some(new_cmd),
+                                        operator: None,
+                                    }
+                                } else {
+                                    t.clone()
+                                }
+                            })
+                            .collect();
+                        prev_res = None;
+                        stdout.push_str("\n");
+                        continue;
+                    }
+                }
                 Operator::LogicalAnd => {
                     if let Some(Err(_)) = prev_res {
                         break;
@@ -102,10 +130,11 @@ pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
                         continue;
                     }
                 }
-                Operator::Pipe => todo!(),
             },
             _ => {}
         }
+
+        curr_index += 1;
     }
 
     (stdout, printed_stdout)
