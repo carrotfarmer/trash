@@ -6,7 +6,7 @@ use crate::{
     builtins,
     path::{find_exec, get_path_var},
     run_exec::run,
-    tokenizer::{Operator, Token},
+    tokenizer::{Command, Operator, Token},
     utils::write_to_file,
 };
 
@@ -25,36 +25,46 @@ pub fn has_redir(tokens: &Vec<Token>) -> bool {
 }
 
 pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
-    let new_tokens = tokens.clone();
-    let mut curr_index = 0;
-
     let mut stdout = String::new();
     let path_var = get_path_var();
 
     let mut printed_stdout = false;
 
     let mut prev_res: Option<Result<String>> = None;
+    let mut is_prev_pipe = false;
 
-    for token in new_tokens {
+    for token in &tokens {
         match token {
             Token {
                 command: Some(cmd),
                 operator: None,
             } => {
                 let cmd_type = cmd.cmd_type.as_ref().unwrap();
+                let mut cmd_args = cmd.args.clone();
+
+                if is_prev_pipe {
+                    let formatted_stdout =
+                        format!("{}", prev_res.as_ref().unwrap().as_ref().unwrap());
+                    let formatted_stdout =
+                        formatted_stdout.replace("\\n", "\n").replace("\\t", "\t");
+
+                    cmd_args.insert(0, formatted_stdout);
+                    println!("{}", cmd_args.join(" "));
+                    is_prev_pipe = false;
+                }
 
                 match cmd_type.to_string().as_str() {
                     "echo" => {
-                        stdout.push_str(builtins::echo(cmd.args.clone()).as_str());
+                        stdout.push_str(builtins::echo(cmd_args.clone()).as_str());
                     }
                     "exit" => {
-                        stdout.push_str(builtins::exit_fn(cmd.args.clone()).as_str());
+                        stdout.push_str(builtins::exit_fn(cmd_args.clone()).as_str());
                     }
                     "type" => {
-                        stdout.push_str(builtins::type_fn(cmd.args.clone(), &path_var).as_str());
+                        stdout.push_str(builtins::type_fn(cmd_args.clone(), &path_var).as_str());
                     }
                     "cd" => {
-                        let path = Path::new(cmd.args.get(0).unwrap());
+                        let path = Path::new(cmd_args.get(0).unwrap());
                         builtins::cd(path.to_path_buf());
                     }
                     "pwd" => {
@@ -71,7 +81,7 @@ pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
 
                         match exec_path {
                             Some(ep) => {
-                                let res = run(ep, cmd.args.clone(), print_stdout);
+                                let res = run(ep, cmd_args.clone(), print_stdout);
 
                                 match res {
                                     Ok(s) => {
@@ -100,24 +110,7 @@ pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
                     if let Some(Err(_)) = prev_res {
                         break;
                     } else {
-                        new_tokens = new_tokens
-                            .iter()
-                            .map(|t| {
-                                let new_token = token.clone();
-                                if t == new_token {
-                                    let mut new_cmd = t.command.clone().unwrap();
-                                    new_cmd.args.push(stdout.clone());
-                                    Token {
-                                        command: Some(new_cmd),
-                                        operator: None,
-                                    }
-                                } else {
-                                    t.clone()
-                                }
-                            })
-                            .collect();
-                        prev_res = None;
-                        stdout.push_str("\n");
+                        is_prev_pipe = true;
                         continue;
                     }
                 }
@@ -133,8 +126,6 @@ pub fn eval_stmt(tokens: Vec<Token>) -> (String, bool) {
             },
             _ => {}
         }
-
-        curr_index += 1;
     }
 
     (stdout, printed_stdout)
