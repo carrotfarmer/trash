@@ -2,7 +2,7 @@
 
 a simple bash clone
 
-https://github.com/carrotfarmer/trash/blob/master/demo.mp4
+https://github.com/carrotfarmer/trash/blob/fd3d41dfb2e6ff2823a36d7b3847f041a44d59fb/demo.mp4
 
 ## building
 
