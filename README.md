@@ -2,7 +2,9 @@
 
 a simple bash clone
 
-![demo video](demo.mp4)
+
+https://github.com/carrotfarmer/trash/blob/master/demo.mp4
+
 
 ## building
 
