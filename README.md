@@ -2,6 +2,8 @@
 
 a simple bash clone
 
+![demo video](demo.mp4)
+
 ## building
 
 If you want to try this out, make sure you have cargo installed. Then, run the following commands:
